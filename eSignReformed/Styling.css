@@ -1,0 +1,35 @@
+﻿.boxes {
+    width: 350px;
+    height: 150px;
+    border-color: black;
+    font-family: Calibri;
+    border-radius: 10px 10px;
+}
+
+.greatbox {
+    align-content: center;
+    margin-left: 600px;
+    background: linear-gradient(#808080,#343434);
+    color: white;
+    width: 360px;
+    border-color: black;
+    border-radius: 10px 10px;
+    border-spacing: 20px 20px;
+}
+
+.sbmtbtn {
+    box-shadow: none;
+    border-radius: 3px 3px;
+}
+
+a:link {
+    color: white
+}
+
+a:visited {
+    color: white
+}
+
+a:active {
+    color: white;
+}

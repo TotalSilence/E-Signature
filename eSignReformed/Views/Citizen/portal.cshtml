@@ -1,0 +1,196 @@
+﻿@model eSignReformed.Models.citizen
+
+@{
+    ViewBag.Title = "portal";
+    Layout = null;
+}
+
+<title>E-signature</title>
+<!DOCTYPE html>
+
+<html>
+<body onload="onload()" style="font-family:Calibri;color:white;background-color:#313131;">
+
+    <link href="~/Styling.css" type="text/css" rel="stylesheet" />
+    <script type="text/javascript">
+        function onload() {
+            $("#sup1").show();
+            $("#sup2").hide();
+            $("#sup3").hide();
+            $("#sup4").hide();
+            sessionStorage.clear();
+        }
+
+        function submitadno() {
+            var re = new RegExp("^[0-9]{12}$");
+            var term = document.getElementById("anumber").value;
+
+            if (re.test(term)) {
+                $("#sup1").hide();
+                $("#sup2").show();
+
+                return true;
+            }
+            alert("This is an invalid aadhar number.\nEnter a valid one.");
+            return false;
+        }
+
+        function submitotp() {
+            var re = new RegExp("^[A-Z]{6}$");
+            var term = document.getElementById("otpinp").value;
+            var count = 0;
+            if (re.test(term)) {
+
+                $("#sup2").hide();
+                $("#sup3").show();
+
+                count = 0;
+
+            }
+            //else if (re.test(term)) {
+            //    alert(otp);
+
+            //    count++;
+
+            //}
+            else {
+                alert("The OTP you entered is invalid.\nEnter a valid otp.");
+                count++;
+
+            }
+            if (count < 3) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        function checkfile() {
+
+            var filename = document.getElementById("fileupld").value;
+            var otp = "pdf";
+            var ext = filename.split('.').pop();
+            if (ext == otp) {
+                document.getElementById("upldbtn").innerText = 'Uploading....';
+                $("#sup3").hide();
+                $("#sup4").show();
+                return true;
+            }
+            alert("This is an ivalid file.\nUpload a .pdf file");
+            return false;
+
+        }
+    </script>
+    <script src="~/Scripts/jquery-3.3.1.js" type="text/javascript"></script>
+    <script src="~/Scripts/jquery.unobtrusive-ajax.js" type="text/javascript"></script>
+
+    <!--This DIV will contain the header of the page -->
+    <div style="overflow:hidden;" id="header">
+        <table>
+            <tr>
+                <td width="200px">
+                    <img src="~/logo.png" style="width:200px;height:100px;align-items:center;border:hidden;box-shadow:none" />
+                </td>
+                <td>
+                    <h1 style="font-family:Calibri;margin-left:430px">
+                        E-Sign Services
+                    </h1>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <!--The DIV which is used to house the the aadhar input field-->
+    <div class="greatbox">
+        <div class="boxes" id="sup1">
+            <div>
+                <h3> <b>Aadhar Number Verification</b></h3>
+            </div>
+            <hr />
+            <div id="div1">
+                @using (Ajax.BeginForm("sendotp", "Citizen", new AjaxOptions { HttpMethod = "POST" }, new { @onsubmit = "if(!submitadno()){return false;}" }))
+                {
+                    <table>
+                        <tr>
+                            <td>
+                                <!--Add a CSS class to adjust the width and height of the cell of the columns-->
+                                @Html.Label("Enter the Aadhar Number:")
+                            </td>
+                            <td>
+                                <div id="test">
+                                    @Html.TextBoxFor(m => m.adno, new { @id = "anumber", @name = "anumber", @title = "Aadhar Number" })
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <br />
+                                <br />
+                                <input type="submit" value="Send OTP" id="sndotpbtn" style="box-shadow:none;border-radius:3px 3px;background-color:#808080;color:white" />
+                            </td>
+                        </tr>
+                    </table>
+                }
+            </div>
+        </div>
+        <!--The DIV which is used to house the OTP input field-->
+        <div class="boxes" id="sup2">
+            <div>
+                <h3><b>OTP verification</b></h3>
+            </div>
+            <hr />
+            <div id="div2">
+                @using (Ajax.BeginForm("verotp", "Citizen", new AjaxOptions { HttpMethod = "POST" }, new { @id = "form2", @onsubmit = "if(!submitotp()) {return false;}" }))
+                {
+                    <table>
+                        <tr>
+                            <td>
+                                @Html.Label("Enter the OTP sent to the registered e-mail address")
+                            </td>
+                            <td>
+                                @Html.TextBox("otp", null, new { @id = "otpinp", @name = "otpintp", @title = "Input OTP" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <br />
+                                <br />
+                                <input type="submit" id="otpsbmt" value="Verify OTP" style="box-shadow:none;border-radius:3px 3px;background-color:#808080;color:white" />
+                            </td>
+                        </tr>
+                    </table>
+                }
+            </div>
+        </div>
+        <!--The DIV which will give the option to upload document-->
+        <div class="boxes" id="sup3">
+            <div>
+                <h3>File Upload</h3>
+            </div>
+            <hr />
+            <div id="div3">
+                <!--//TODO: Create a function for the OTP to be sent and Verifiy it using another function-->
+                <table>
+                    <tr>
+                        <td>
+                            <form id="form3" action="@Url.Action("UploadControl","Citizen")" method="post" enctype="multipart/form-data" onsubmit="if (!checkfile()) { return false; }">
+                                @Html.Label("Upload the file (Maximum Allowed Size is 9MB)")
+                                <input type="file" name="file" id="fileupld" title="Upload the File" />
+                                <br />
+                                <br />
+                                <input type="submit" value="Upload" id="upldbtn" style="box-shadow:none;border-radius:3px 3px;background-color:#808080;color:white" />
+                            </form>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div id="sup4">
+            <h1>
+                Document has been Signed
+                <br />
+                @Html.ActionLink("Go Back", "portal",new {@class ="a" })
+            </h1>
+        </div>
+    </div>
+</body>
+</html>
