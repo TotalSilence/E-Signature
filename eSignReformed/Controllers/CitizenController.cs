@@ -228,7 +228,7 @@ namespace eSignReformed.Controllers
 
         public bool verify(string otp)
         {
-            if (otp.ToString() == "OTPOTP" )  //Session["otp"].ToString()
+            if (otp.ToString() == Session["otp"].ToString()) 
             {
                 return true;
             }
