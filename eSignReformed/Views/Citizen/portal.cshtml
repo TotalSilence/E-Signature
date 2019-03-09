@@ -9,6 +9,7 @@
 <!DOCTYPE html>
 
 <html>
+
 <body onload="onload()" style="font-family:Calibri;color:white;background-color:#313131;">
 
     <link href="~/Styling.css" type="text/css" rel="stylesheet" />
@@ -18,53 +19,54 @@
             $("#sup2").hide();
             $("#sup3").hide();
             $("#sup4").hide();
+            $("#invfilediv").hide();
+
             sessionStorage.clear();
         }
 
         function submitadno() {
             var re = new RegExp("^[0-9]{12}$");
             var term = document.getElementById("anumber").value;
-
-            if (re.test(term)) {
-                $("#sup1").hide();
-                $("#sup2").show();
-
-                return true;
-            }
-            alert("This is an invalid aadhar number.\nEnter a valid one.");
+                if (re.test(term) ) {
+                    $("#sup1").hide();
+                    $("#sup2").show();
+                    return true;}
+                else
+                {alert("This is an invalid aadhar number.\nEnter a valid one.");
             return false;
+                }
         }
 
         function submitotp() {
             var re = new RegExp("^[A-Z]{6}$");
             var term = document.getElementById("otpinp").value;
             var count = 0;
-            if (re.test(term)) {
+            $.post("@Url.Action("tokens","Citizen")", function (data) {
 
-                $("#sup2").hide();
-                $("#sup3").show();
+                if (re.test(term) && term == data) {
 
-                count = 0;
+                    $("#sup2").hide();
+                    $("#sup3").show();
+                    return true;
 
-            }
-            //else if (re.test(term)) {
-            //    alert(otp);
+                }
+                else if (re.test(term)) {
+                    alert("The OTP entered is incorrect");
+                    count++;
+                    return false;
+                }
+                else {
+                    alert("This is an invalid OTP.\nEnter a valid one.")
+                    count++;
+                    return false;
+                }
+                if (count >= 3) {
+                    return false;
+                }
 
-            //    count++;
-
-            //}
-            else {
-                alert("The OTP you entered is invalid.\nEnter a valid otp.");
-                count++;
-
-            }
-            if (count < 3) {
-                return true;
-            }
-            else {
-                return false;
-            }
+            });
         }
+
         function checkfile() {
 
             var filename = document.getElementById("fileupld").value;
@@ -79,6 +81,11 @@
             alert("This is an ivalid file.\nUpload a .pdf file");
             return false;
 
+        }
+
+        function invfile() {
+            $("#invfilediv").show();
+            $("#sup3").hide();
         }
     </script>
     <script src="~/Scripts/jquery-3.3.1.js" type="text/javascript"></script>
@@ -106,8 +113,9 @@
                 <h3> <b>Aadhar Number Verification</b></h3>
             </div>
             <hr />
+
             <div id="div1">
-                @using (Ajax.BeginForm("sendotp", "Citizen", new AjaxOptions { HttpMethod = "POST" }, new { @onsubmit = "if(!submitadno()){return false;}" }))
+                @using (Ajax.BeginForm("sendotp", "Citizen", new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "otptxt" }, new { @onsubmit = "if(!submitadno()){return false;}" }))
                 {
                     <table>
                         <tr>
@@ -132,6 +140,7 @@
                 }
             </div>
         </div>
+
         <!--The DIV which is used to house the OTP input field-->
         <div class="boxes" id="sup2">
             <div>
@@ -139,7 +148,7 @@
             </div>
             <hr />
             <div id="div2">
-                @using (Ajax.BeginForm("verotp", "Citizen", new AjaxOptions { HttpMethod = "POST" }, new { @id = "form2", @onsubmit = "if(!submitotp()) {return false;}" }))
+                @using (Ajax.BeginForm("verotp", "Citizen", new AjaxOptions { HttpMethod = "POST" }, new { @id = "form3", @onsubmit = "if(!submitotp()){return false;}" }))
                 {
                     <table>
                         <tr>
@@ -161,6 +170,7 @@
                 }
             </div>
         </div>
+
         <!--The DIV which will give the option to upload document-->
         <div class="boxes" id="sup3">
             <div>
@@ -184,12 +194,19 @@
                 </table>
             </div>
         </div>
-        <div id="sup4">
+
+        <div id="sup4" class="boxes">
             <h1>
                 Document has been Signed
                 <br />
-                @Html.ActionLink("Go Back", "portal",new {@class ="a" })
+                @Html.ActionLink("Go Back", "portal", new { @class = "a" })
             </h1>
+        </div>
+        <div id="invfilediv" class="boxes">
+            <span>
+                File is not uploaded. Try Again
+                <button id="tryagain" class="sbmtbtn"> Try Again</button>
+            </span>
         </div>
     </div>
 </body>

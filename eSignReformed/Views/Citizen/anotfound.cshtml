@@ -1,0 +1,37 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <link href="~/Styling.css" type="text/css" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Not Found</title>
+</head>
+<body>
+    <div>
+        <div style="overflow:hidden;" id="header">
+            <table>
+                <tr>
+                    <td width="200px">
+                        <img src="~/logo.png" style="width:200px;height:100px;align-items:center;border:hidden;box-shadow:none" />
+                    </td>
+                    <td>
+                        <h1 style="font-family:Calibri;margin-left:430px">
+                            E-Sign Services
+                        </h1>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="boxes">
+            Aadhar Number Not Found.
+            <br />
+            <b>@Html.ActionLink("Go Back to portal","portal",new { @class = "a"})</b>
+        </div>
+    </div>
+</body>
+</html>

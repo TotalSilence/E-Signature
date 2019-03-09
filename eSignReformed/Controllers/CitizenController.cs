@@ -1,7 +1,6 @@
 ﻿using eSignReformed.Models;
 using IronPdf;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Mail;
 using System.Security.Cryptography;
@@ -93,11 +92,10 @@ namespace eSignReformed.Controllers
                 return View();
             }
         }*/
+        
 
         public ActionResult portal()
         {
-            Session.RemoveAll();
-            Session.Abandon();
             return View();
         }
 
@@ -120,14 +118,20 @@ namespace eSignReformed.Controllers
 
                 token = generateotp();
                 Session["otp"] = token.ToString();  //Session stores the otp for
+                ViewBag.otp = token.ToString();
                 Sendmail(cz, token);
+                
             }
             else
             {
-                Response.Write("<script>alert('This aadhar number is not found.\nEnsure the aadhar number entered is correct.\nEnsure to enroll for aadhar number.')</script>");
+                RedirectToAction("anotfound");
             }
         }
 
+        public ActionResult anotfound()
+        {
+            return View();
+        }
         public string generateotp()    //Generates OTP Cryptographically
         {
             StringBuilder token = new StringBuilder();
@@ -145,43 +149,49 @@ namespace eSignReformed.Controllers
             return token.ToString();
         }
 
-        [HttpPost]
-        public void UploadControl(HttpPostedFileBase file)
+        public string tokens(string token)
         {
-            
-            if (file.ContentLength > 0 && file != null)
-            {
-                string extension = Path.GetExtension(file.FileName);
-                string fileName = Session["ano"].ToString() + extension;
-                file.SaveAs(Path.Combine(Server.MapPath(@"~/PDF/"), fileName));
-                signeddoc();
-                
-            }
-            else
-            {
-                Session.RemoveAll();
-                Session.Abandon();
-                Response.Redirect("https://www.google.com");//Test to observe the result of the above condition
-            }
-            
-            
+            token = Session["otp"].ToString();
+
+            return token;
         }
 
         [HttpPost]
-        public void verotp(FormCollection col)
+        public void UploadControl(HttpPostedFileBase file)
         {
-            string otp = col["otp"].ToString();
-            if (!verify(otp))
+            if (file.ContentLength > 0 && file != null && file.ContentLength < 1048576)
             {
-                Session.RemoveAll();
-                Session.Abandon();
-                //Redirect to Portal
-                
-                
+                try
+                {
+                    string extension = Path.GetExtension(file.FileName);
+                    string fileName = Session["ano"].ToString() + extension;
+                    file.SaveAs(Path.Combine(Server.MapPath(@"~/PDF/"), fileName));
+                    signeddoc();
+                }
+                catch
+                {
+                    //invalid File
+                }
             }
             else
             {
-                Response.Redirect("https://www.duckduckgo.com");
+                Session.RemoveAll();
+                Session.Abandon();
+                //Invalid File
+                
+            }
+        }
+
+        [HttpPost]
+        public void verotp(string otp)
+        {
+            if (!verify(otp))
+            {
+                // OTp is wrong
+            }
+            else
+            {
+                //OTP is right
             }
         }
 
@@ -214,7 +224,7 @@ namespace eSignReformed.Controllers
             Pdf.SaveAs("~/SignedPDFs/" + filename);
 
             //Try to print the document
-            
+
             HtmlToPdf Renderer = new HtmlToPdf();
             string pth = @"C:\Users\chait\source\repos\eSign3\eSign3\SignedPDFs\" + filename;
             PdfDocument Pdf1 = new PdfDocument(pth);
@@ -228,7 +238,7 @@ namespace eSignReformed.Controllers
 
         public bool verify(string otp)
         {
-            if (otp.ToString() == Session["otp"].ToString()) 
+            if (otp.ToString() == Session["otp"].ToString())
             {
                 return true;
             }
