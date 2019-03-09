@@ -92,7 +92,6 @@ namespace eSignReformed.Controllers
                 return View();
             }
         }*/
-        
 
         public ActionResult portal()
         {
@@ -120,7 +119,6 @@ namespace eSignReformed.Controllers
                 Session["otp"] = token.ToString();  //Session stores the otp for
                 ViewBag.otp = token.ToString();
                 Sendmail(cz, token);
-                
             }
             else
             {
@@ -132,6 +130,7 @@ namespace eSignReformed.Controllers
         {
             return View();
         }
+
         public string generateotp()    //Generates OTP Cryptographically
         {
             StringBuilder token = new StringBuilder();
@@ -159,7 +158,7 @@ namespace eSignReformed.Controllers
         [HttpPost]
         public void UploadControl(HttpPostedFileBase file)
         {
-            if (file.ContentLength > 0 && file != null && file.ContentLength < 1048576)
+            if (file.ContentLength > 0 && file != null && file.ContentLength < 214748364)
             {
                 try
                 {
@@ -170,6 +169,8 @@ namespace eSignReformed.Controllers
                 }
                 catch
                 {
+                    Response.Write("<script type='text / javascript'>alert('The file is invalid');</script>");
+                    Redirect(Request.UrlReferrer.ToString());
                     //invalid File
                 }
             }
@@ -177,8 +178,8 @@ namespace eSignReformed.Controllers
             {
                 Session.RemoveAll();
                 Session.Abandon();
+                Redirect(Request.UrlReferrer.ToString());
                 //Invalid File
-                
             }
         }
 
@@ -200,18 +201,16 @@ namespace eSignReformed.Controllers
         {
             long adno = Convert.ToInt64(Session["ano"].ToString());
             //document signing
-            //List<PdfDocument> pdfs = new List<PdfDocument>();
 
             //File 1
             string file1 = Session["ano"].ToString() + ".pdf";
             string path1 = Path.Combine(Server.MapPath(@"~/PDF/"), file1);
-            //pdfs.Add(PdfDocument.FromFile(path1));
 
-            string filename = "Signed" + Session["ano"].ToString() + ".pdf";
+            string signedfilename = "Signed" + Session["ano"].ToString() + ".pdf";
 
-            string sname = "signature" + Session["ano"].ToString() + ".png";
+            
 
-            string signpath = Path.Combine(Server.MapPath("~/Signatures/"), sname);
+            
 
             HtmlToPdf Renderer1 = new HtmlToPdf();
 
@@ -219,14 +218,14 @@ namespace eSignReformed.Controllers
 
             int pc = Pdf.PageCount;
 
-            HtmlStamp SignatureStamp = new HtmlStamp() { Html = "<img src='" + signpath + "' />", Width = 50, Height = 50, Bottom = 10, Right = 10, ZIndex = HtmlStamp.StampLayer.OnTopOfExistingPDFContent };
+            HtmlStamp SignatureStamp = new HtmlStamp() { Html = "<img src='~/verified.png' />", Width = 50, Height = 50, Bottom = 10, Left = 10, ZIndex = HtmlStamp.StampLayer.OnTopOfExistingPDFContent };
             Pdf.StampHTML(SignatureStamp, pc - 1);
-            Pdf.SaveAs("~/SignedPDFs/" + filename);
+            Pdf.SaveAs("~/SignedPDFs/" + signedfilename);
 
             //Try to print the document
 
             HtmlToPdf Renderer = new HtmlToPdf();
-            string pth = @"C:\Users\chait\source\repos\eSign3\eSign3\SignedPDFs\" + filename;
+            string pth = @"C:\Users\chait\source\repos\eSign3\eSign3\SignedPDFs\" + signedfilename;
             PdfDocument Pdf1 = new PdfDocument(pth);
             Pdf1.Print();
             Session.RemoveAll();

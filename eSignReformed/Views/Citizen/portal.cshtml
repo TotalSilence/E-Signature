@@ -68,7 +68,14 @@
         }
 
         function checkfile() {
-
+            $("#form3").submit(e)
+            {
+                e.preventDefault();
+                $.post("@Url.Action("UploadControl","Citizen")",$("#form3").serialize(), function(data){
+          //do something with the response data 
+   });
+            }
+           
             var filename = document.getElementById("fileupld").value;
             var otp = "pdf";
             var ext = filename.split('.').pop();
