@@ -72,10 +72,10 @@
             {
                 e.preventDefault();
                 $.post("@Url.Action("UploadControl","Citizen")",$("#form3").serialize(), function(data){
-          //do something with the response data 
+          //do something with the response data
    });
             }
-           
+
             var filename = document.getElementById("fileupld").value;
             var otp = "pdf";
             var ext = filename.split('.').pop();
@@ -191,7 +191,7 @@
                         <td>
                             <form id="form3" action="@Url.Action("UploadControl","Citizen")" method="post" enctype="multipart/form-data" onsubmit="if (!checkfile()) { return false; }">
                                 @Html.Label("Upload the file (Maximum Allowed Size is 9MB)")
-                                <input type="file" name="file" id="fileupld" title="Upload the File" />
+                                <input type="file" name="file" id="fileupld" title="Upload the File" width="100" />
                                 <br />
                                 <br />
                                 <input type="submit" value="Upload" id="upldbtn" style="box-shadow:none;border-radius:3px 3px;background-color:#808080;color:white" />
@@ -201,7 +201,7 @@
                 </table>
             </div>
         </div>
-
+        
         <div id="sup4" class="boxes">
             <h1>
                 Document has been Signed

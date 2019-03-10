@@ -1,6 +1,8 @@
 ﻿using eSignReformed.Models;
 using IronPdf;
 using System;
+using System.Configuration;
+using System.Data.SqlClient;
 using System.IO;
 using System.Net.Mail;
 using System.Security.Cryptography;
@@ -92,6 +94,7 @@ namespace eSignReformed.Controllers
                 return View();
             }
         }*/
+        public citizen c = new citizen();
 
         public ActionResult portal()
         {
@@ -119,6 +122,7 @@ namespace eSignReformed.Controllers
                 Session["otp"] = token.ToString();  //Session stores the otp for
                 ViewBag.otp = token.ToString();
                 Sendmail(cz, token);
+                c = cz;
             }
             else
             {
@@ -156,29 +160,32 @@ namespace eSignReformed.Controllers
         }
 
         [HttpPost]
-        public void UploadControl(HttpPostedFileBase file)
+        public ActionResult UploadControl(HttpPostedFileBase file)
         {
             if (file.ContentLength > 0 && file != null && file.ContentLength < 214748364)
             {
-                try
-                {
-                    string extension = Path.GetExtension(file.FileName);
-                    string fileName = Session["ano"].ToString() + extension;
-                    file.SaveAs(Path.Combine(Server.MapPath(@"~/PDF/"), fileName));
-                    signeddoc();
-                }
-                catch
-                {
-                    Response.Write("<script type='text / javascript'>alert('The file is invalid');</script>");
-                    Redirect(Request.UrlReferrer.ToString());
-                    //invalid File
-                }
+                long a = Convert.ToInt64(Session["ano"].ToString());
+                string extension = Path.GetExtension(file.FileName);
+                string fileName = Session["ano"].ToString() + c.nooffiles + extension;
+                //updating no. of files in data base
+                c.nooffiles = c.nooffiles + 1;
+                SqlConnection sql = new SqlConnection(ConfigurationManager.ConnectionStrings["eReformed"].ConnectionString);
+                SqlCommand cmd = new SqlCommand("update citizens set nooffiles=@n where adno = @a", sql);
+                sql.Open();
+                cmd.Parameters.AddWithValue("@n", c.nooffiles);
+                cmd.Parameters.AddWithValue("@a", a);
+                cmd.ExecuteNonQuery();
+                sql.Close();
+
+                file.SaveAs(Path.Combine(Server.MapPath(@"~/PDF/"), fileName));
+                signeddoc();
+                return View("portal");
             }
             else
             {
                 Session.RemoveAll();
                 Session.Abandon();
-                Redirect(Request.UrlReferrer.ToString());
+               return Redirect(Request.UrlReferrer.ToString());
                 //Invalid File
             }
         }
@@ -203,30 +210,23 @@ namespace eSignReformed.Controllers
             //document signing
 
             //File 1
-            string file1 = Session["ano"].ToString() + ".pdf";
+            string file1 = Session["ano"].ToString() + (c.nooffiles - 1) + ".pdf";
             string path1 = Path.Combine(Server.MapPath(@"~/PDF/"), file1);
 
-            string signedfilename = "Signed" + Session["ano"].ToString() + ".pdf";
-
-            
-
-            
-
-            HtmlToPdf Renderer1 = new HtmlToPdf();
+            string signedfilename = "Signed" + Session["ano"].ToString() + (c.nooffiles - 1) + ".pdf";
 
             PdfDocument Pdf = new PdfDocument(path1);
+            string signpath = Server.MapPath("~/verifiedsmalll.png");
 
             int pc = Pdf.PageCount;
-
-            HtmlStamp SignatureStamp = new HtmlStamp() { Html = "<img src='~/verified.png' />", Width = 50, Height = 50, Bottom = 10, Left = 10, ZIndex = HtmlStamp.StampLayer.OnTopOfExistingPDFContent };
-            Pdf.StampHTML(SignatureStamp, pc - 1);
+            string html = "<img src ='"+signpath+"'  />";
+            HtmlStamp s = new HtmlStamp() { Html = html, Opacity= 60, AutoCenterStampContentOnStampCanvas = true, ZIndex = HtmlStamp.StampLayer.OnTopOfExistingPDFContent, Height = 50, Width=50  };
+            Pdf.StampHTML(s);
+            string savedpth = Path.Combine(Server.MapPath(@"~/SignedPDFs/"), signedfilename);
             Pdf.SaveAs("~/SignedPDFs/" + signedfilename);
-
+            
             //Try to print the document
-
-            HtmlToPdf Renderer = new HtmlToPdf();
-            string pth = @"C:\Users\chait\source\repos\eSign3\eSign3\SignedPDFs\" + signedfilename;
-            PdfDocument Pdf1 = new PdfDocument(pth);
+            PdfDocument Pdf1 = new PdfDocument(savedpth);
             Pdf1.Print();
             Session.RemoveAll();
             Session.Abandon();

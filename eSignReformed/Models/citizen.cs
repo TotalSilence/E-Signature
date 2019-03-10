@@ -11,16 +11,16 @@ namespace eSignReformed.Models
 {
     using System;
     using System.Collections.Generic;
-    
+
     public partial class citizen
     {
         [Required(ErrorMessage = "This is a required field")]
-        [RegularExpression("^[0-9]{12}$", ErrorMessage ="This is an invalid aadhar number.\nEnter a valid one.")]
+        [RegularExpression("^[0-9]{12}$", ErrorMessage = "This is an invalid aadhar number.\nEnter a valid one.")]
         [MaxLength(12)]
         [MinLength(12)]
         public long adno { get; set; }
         [Required(ErrorMessage = "This is a required field")]
-        [EmailAddress(ErrorMessage ="This is an invalid email address.\n Enter a valid one.")]
+        [EmailAddress(ErrorMessage = "This is an invalid email address.\n Enter a valid one.")]
         public string email { get; set; }
         [Required(ErrorMessage = "This is a required field")]
         public string naam { get; set; }
@@ -28,5 +28,7 @@ namespace eSignReformed.Models
         public string addr { get; set; }
         [Required(ErrorMessage = "This is a required field")]
         public long pno { get; set; }
+        
+        public int nooffiles { get; set; }
     }
 }
