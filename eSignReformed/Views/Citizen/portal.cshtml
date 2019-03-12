@@ -36,33 +36,37 @@
             return false;
                 }
         }
-
+        var count = 0;
         function submitotp() {
             var re = new RegExp("^[A-Z]{6}$");
             var term = document.getElementById("otpinp").value;
-            var count = 0;
+            
             $.post("@Url.Action("tokens","Citizen")", function (data) {
 
                 if (re.test(term) && term == data) {
 
                     $("#sup2").hide();
                     $("#sup3").show();
+                    count = 0;
                     return true;
 
                 }
                 else if (re.test(term)) {
                     alert("The OTP entered is incorrect");
-                    count++;
+                    count = count + 1;
+                    if (count >= 3) {
+                        window.location.reload();
+                    }
                     return false;
                 }
                 else {
                     alert("This is an invalid OTP.\nEnter a valid one.")
-                    count++;
+                    count = count + 1;
+                    if (count >= 3) {
+                        window.location.reload();
+                    }
                     return false;
-                }
-                if (count >= 3) {
-                    return false;
-                    window.location.href = "/Citizen/portal";
+
                 }
 
             });
@@ -202,7 +206,7 @@
                 </table>
             </div>
         </div>
-        
+
         <div id="sup4" class="boxes">
             <h1>
                 Document has been Signed
