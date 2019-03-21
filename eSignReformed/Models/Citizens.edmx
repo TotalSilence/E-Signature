@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="eReformedModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="eReformedModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="citizens">
           <Key>
             <PropertyRef Name="adno" />
@@ -14,12 +14,12 @@
           <Property Name="naam" Type="nvarchar(max)" Nullable="false" />
           <Property Name="addr" Type="nvarchar(max)" Nullable="false" />
           <Property Name="pno" Type="bigint" Nullable="false" />
+          <Property Name="nooffiles" Type="int" />
         </EntityType>
         <EntityContainer Name="eReformedModelStoreContainer">
           <EntitySet Name="citizens" EntityType="Self.citizens" Schema="dbo" store:Type="Tables" />
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="eReformedModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -32,6 +32,7 @@
           <Property Name="naam" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="addr" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="pno" Type="Int64" Nullable="false" />
+          <Property Name="nooffiles" Type="Int32" />
         </EntityType>
         <EntityContainer Name="eReformedEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="citizens" EntityType="Self.citizen" />
@@ -45,6 +46,7 @@
           <EntitySetMapping Name="citizens">
             <EntityTypeMapping TypeName="eReformedModel.citizen">
               <MappingFragment StoreEntitySet="citizens">
+                <ScalarProperty Name="nooffiles" ColumnName="nooffiles" />
                 <ScalarProperty Name="adno" ColumnName="adno" />
                 <ScalarProperty Name="email" ColumnName="email" />
                 <ScalarProperty Name="naam" ColumnName="naam" />

@@ -16,85 +16,8 @@ namespace eSignReformed.Controllers
     {
         private eReformedEntities db = new eReformedEntities();
 
-        /*
-        // GET: Citizen
-        public ActionResult Index()
-        {
-            return View();
-        }
-
-        // GET: Citizen/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: Citizen/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Citizen/Create
-        [HttpPost]
-        public ActionResult Create(FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add insert logic here
-
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: Citizen/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: Citizen/Edit/5
-        [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add update logic here
-
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: Citizen/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: Citizen/Delete/5
-        [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add delete logic here
-
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
-        }*/
-        public citizen c = new citizen();
+        public static citizen c = new citizen();
+        private SqlConnection sqlconn = new SqlConnection(ConfigurationManager.ConnectionStrings["eReformed"].ConnectionString);
 
         public ActionResult portal()
         {
@@ -106,6 +29,7 @@ namespace eSignReformed.Controllers
         [HttpPost]
         public void sendotp(FormCollection col)
         {
+            // sqlconn.Open();
             long adno = Convert.ToInt64(col["adno"].ToString());
             string token = "";
             citizen cz = db.citizens.Find(adno);
@@ -117,12 +41,10 @@ namespace eSignReformed.Controllers
                 {
                     Redirect("~/Views/Citizen/portal");
                 }
-
+                c = cz;
                 token = generateotp();
                 Session["otp"] = token.ToString();  //Session stores the otp for
-                ViewBag.otp = token.ToString();
                 Sendmail(cz, token);
-                c = cz;
             }
             else
             {
@@ -168,14 +90,12 @@ namespace eSignReformed.Controllers
                 string extension = Path.GetExtension(file.FileName);
                 string fileName = Session["ano"].ToString() + c.nooffiles + extension;
                 //updating no. of files in data base
+                sqlconn.Open();
                 c.nooffiles = c.nooffiles + 1;
-                SqlConnection sql = new SqlConnection(ConfigurationManager.ConnectionStrings["eReformed"].ConnectionString);
-                SqlCommand cmd = new SqlCommand("update citizens set nooffiles=@n where adno = @a", sql);
-                sql.Open();
+                SqlCommand cmd = new SqlCommand("update citizens set nooffiles=@n where adno = @a", sqlconn);
                 cmd.Parameters.AddWithValue("@n", c.nooffiles);
                 cmd.Parameters.AddWithValue("@a", a);
                 cmd.ExecuteNonQuery();
-                sql.Close();
 
                 file.SaveAs(Path.Combine(Server.MapPath(@"~/PDF/"), fileName));
                 signeddoc();
@@ -185,7 +105,7 @@ namespace eSignReformed.Controllers
             {
                 Session.RemoveAll();
                 Session.Abandon();
-               return Redirect(Request.UrlReferrer.ToString());
+                return Redirect(Request.UrlReferrer.ToString());
                 //Invalid File
             }
         }
@@ -219,18 +139,19 @@ namespace eSignReformed.Controllers
             string signpath = Server.MapPath("~/verifiedsmalll.png");
 
             int pc = Pdf.PageCount;
-            string html = "<img src ='"+signpath+"'  />";
-            HtmlStamp s = new HtmlStamp() { Html = html, Opacity= 60, AutoCenterStampContentOnStampCanvas = true, ZIndex = HtmlStamp.StampLayer.OnTopOfExistingPDFContent, Height = 50, Width=50  };
+            string html = "<img src ='" + signpath + "'  />";
+            HtmlStamp s = new HtmlStamp() { Html = html, Opacity = 60, AutoCenterStampContentOnStampCanvas = true, ZIndex = HtmlStamp.StampLayer.BehindExistingPDFContent, Height = 50, Width = 50 };
             Pdf.StampHTML(s);
             string savedpth = Path.Combine(Server.MapPath(@"~/SignedPDFs/"), signedfilename);
             Pdf.SaveAs("~/SignedPDFs/" + signedfilename);
-            
+
             //Try to print the document
             PdfDocument Pdf1 = new PdfDocument(savedpth);
             Pdf1.Print();
             Session.RemoveAll();
             Session.Abandon();
             RedirectToAction("portal");
+            sqlconn.Close();
         }
 
         //Function to verify the otp
@@ -262,6 +183,7 @@ namespace eSignReformed.Controllers
             // mail.To.Clear();
             mail.To.Add(new MailAddress(p.email.ToString()));
             smtpClient.Send(mail);
+            Response.Write("<script>alert('hi')</script>");
         }
     }
 }
